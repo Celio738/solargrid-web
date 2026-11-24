@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>SolarGrid - Emissão de Faturas Solares</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 30px; background-color: #f4f7f6; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 25px; border-radius: 8px; }
+        .form-group { margin-bottom: 12px; }
+        label { display: block; font-weight: bold; margin-bottom: 4px; }
+        input, select { width: 100%; padding: 8px; box-sizing: border-box; }
+        button { background-color: #1976d2; color: white; border: none; padding: 10px 18px; cursor: pointer; border-radius: 4px; }
+        .alert-success { background-color: #d4edda; color: #155724; padding: 10px; margin-bottom: 15px; border-radius: 4px; }
+        .alert-error { background-color: #f8d7da; color: #721c24; padding: 10px; margin-bottom: 15px; border-radius: 4px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>SolarGrid - Faturamento e Compensação de Energia</h1>
+
+    <div id="msgSucesso" th:if="${mensagemSucesso}" class="alert-success" th:text="${mensagemSucesso}"></div>
+    <div id="msgErro" th:if="${mensagemErro}" class="alert-error" th:text="${mensagemErro}"></div>
+
+    <form action="/faturas/emitir" method="post" id="formFatura">
+        <div class="form-group">
+            <label for="nomeCliente">Nome / Razão Social:</label>
+            <input type="text" id="nomeCliente" name="nomeCliente" placeholder="Ex: João da Silva">
+        </div>
+        <div class="form-group">
+            <label for="cpfCnpj">CPF / CNPJ:</label>
+            <input type="text" id="cpfCnpj" name="cpfCnpj" placeholder="Ex: 12345678901">
+        </div>
+        <div class="form-group">
+            <label for="consumoKwh">Consumo da Rede (kWh):</label>
+            <input type="number" step="0.1" id="consumoKwh" name="consumoKwh" value="0">
+        </div>
+        <div class="form-group">
+            <label for="creditoKwh">Crédito Solar Injetado (kWh):</label>
+            <input type="number" step="0.1" id="creditoKwh" name="creditoKwh" value="0">
+        </div>
+        <div class="form-group">
+            <label for="bandeira">Bandeira Tarifária (1=Verde, 2=Amarela, 3=Vermelha P1, 4=Vermelha P2):</label>
+            <input type="number" id="bandeira" name="bandeira" value="1">
+        </div>
+        <div class="form-group">
+            <label for="diasAtraso">Dias de Atraso:</label>
+            <input type="number" id="diasAtraso" name="diasAtraso" value="0">
+        </div>
+        <button type="submit" id="btnEmitir">Calcular e Emitir Fatura</button>
+    </form>
+
+    <h2>Faturas Emitidas</h2>
+    <table id="tabelaFaturas">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Cliente</th>
+            <th>CPF/CNPJ</th>
+            <th>Bandeira</th>
+            <th>Valor Final (R$)</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="f : ${faturas}">
+            <td th:text="${f.id}"></td>
+            <td th:text="${f.cliente.nomeRazaoSocial}"></td>
+            <td th:text="${f.cliente.documentoCpfCnpj}"></td>
+            <td th:text="${f.bandeiraTarifaria}"></td>
+            <td th:text="${f.valorTotalCalculado}"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
