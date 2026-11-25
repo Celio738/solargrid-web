@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>SolarGrid - Diagnóstico de Inversores</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; background-color: #f0f4f8; color: #1e293b; }
+        .navbar { background-color: #0f172a; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
+        .navbar .brand { color: #facc15; font-size: 20px; font-weight: bold; text-decoration: none; }
+        .navbar .nav-links a { color: #e2e8f0; text-decoration: none; margin-left: 20px; font-weight: 500; padding: 6px 12px; border-radius: 4px; }
+        .navbar .nav-links a:hover, .navbar .nav-links a.active { background-color: #1e293b; color: #facc15; }
+        .container { max-width: 960px; margin: 30px auto; background: white; padding: 25px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+        .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+        .form-group label { display: block; font-weight: 600; font-size: 13px; margin-bottom: 4px; }
+        .form-group input { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #cbd5e1; border-radius: 4px; }
+        button { background-color: #ea580c; color: white; border: none; padding: 10px 18px; cursor: pointer; border-radius: 5px; margin-top: 15px; font-weight: bold; }
+        .result-box { background-color: #eff6ff; border-left: 5px solid #2563eb; padding: 15px; margin-bottom: 20px; border-radius: 4px; }
+        .badge { padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; color: white; }
+        .badge-EMERGENCIAL { background-color: #dc2626; }
+        .badge-ALTA { background-color: #d97706; }
+        .badge-PREVENTIVA { background-color: #16a34a; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #e2e8f0; padding: 10px; text-align: left; font-size: 14px; }
+        th { background-color: #f8fafc; }
+    </style>
+</head>
+<body>
+<div class="navbar">
+    <a href="/" class="brand">SolarGrid Web</a>
+    <div class="nav-links">
+        <a href="/">Dashboard</a>
+        <a href="/usinas">Usinas</a>
+        <a href="/inversores" class="active">Inversores &amp; Risco</a>
+        <a href="/faturas">Faturamento</a>
+    </div>
+</div>
+
+<div class="container">
+    <h1>Diagnóstico Operacional de Inversores &amp; Manutenção</h1>
+
+    <div th:if="${ultimaOrdem}" class="result-box">
+        <strong>Diagnóstico concluído!</strong> Score de Risco calculado: <strong th:text="${ultimoScore}">0</strong>/100 |
+        Protocolo aberto: <strong th:text="${ultimaOrdem.protocolo}">OS</strong> |
+        Prioridade: <span th:class="'badge badge-' + ${ultimaOrdem.prioridade}" th:text="${ultimaOrdem.prioridade}"></span>
+    </div>
+
+    <form action="/inversores/diagnosticar" method="post">
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Nº de Série do Inversor:</label>
+                <input type="text" name="numeroSerie" value="INV-WEG-900" required>
+            </div>
+            <div class="form-group">
+                <label>Fabricante:</label>
+                <input type="text" name="fabricante" value="WEG" required>
+            </div>
+            <div class="form-group">
+                <label>Temperatura (°C):</label>
+                <input type="number" step="0.1" name="temperaturaC" value="58.0" required>
+            </div>
+            <div class="form-group">
+                <label>Tensão de Saída (V):</label>
+                <input type="number" step="0.1" name="tensaoV" value="220.0" required>
+            </div>
+            <div class="form-group">
+                <label>Eficiência de Conversão (%):</label>
+                <input type="number" step="0.1" name="eficienciaPct" value="88.0" required>
+            </div>
+            <div class="form-group">
+                <label>Horas Contínuas de Operação:</label>
+                <input type="number" name="horasContinuas" value="750" required>
+            </div>
+        </div>
+        <button type="submit">Executar Diagnóstico e Gerar Ordem</button>
+    </form>
+
+    <h2>Ordens de Manutenção Geradas</h2>
+    <table>
+        <thead>
+        <tr>
+            <th>Protocolo</th>
+            <th>Inversor</th>
+            <th>Fabricante</th>
+            <th>Prioridade</th>
+            <th>Custo Estimado (R$)</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="o : ${ordens}">
+            <td th:text="${o.protocolo}"></td>
+            <td th:text="${o.inversorAlvo.numeroSerie}"></td>
+            <td th:text="${o.inversorAlvo.fabricante}"></td>
+            <td><span th:class="'badge badge-' + ${o.prioridade}" th:text="${o.prioridade}"></span></td>
+            <td th:text="${#numbers.formatDecimal(o.custoEstimado, 1, 2)}"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
